@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from typing import Any
 import uuid
 
-from models import Order
+from models import Order, OrderUpdate
 from orders_store import OrdersStore
 
 orders_store = OrdersStore()
@@ -26,6 +26,7 @@ def create_order(order: Order) -> Any:
             "endereco": saved_order.get("endereco"),
             "itens": saved_order.get("itens"),
             "pagamento": pagamento_out,
+            "status": saved_order.get("status,", "created")
         }
     
     except Exception as e:
@@ -33,21 +34,45 @@ def create_order(order: Order) -> Any:
             status_code=400,
             detail=f"Erro ao processar o pedido: {str(e)}"
         )
-
-@router.put("/orders/{order_id}", status_code=status.HTTP_200_OK)
-def update_order(order_id: str, order: Order) -> Any:
+    
+@router.get("/orders/{order_id}", status_code=status.HTTP_200_OK)
+def get_order(order_id: str) -> Any:
     try:
-        # Atualiza o pedido no armazenamento
-        orders_store.update_order(order_id, order.model_dump())
+        order_data = orders_store.get_order(order_id)
+        
+        if not order_data:
+            raise HTTPException(status_code=404, detail="Pedido não encontrado")
+
+        pagamento_out: dict = order_data.get("pagamento", {})
+        if pagamento_out.get("tipo") == "card":
+            pagamento_out.pop("card_number", None)
 
         return {
-            "order_id": order_id,
-            "status": "updated",
-            "cliente": order.cliente.model_dump(),
-            "endereco": order.endereco.model_dump(),
-            "itens": [item.model_dump() for item in order.itens],
-            "pagamento": order.pagamento.model_dump(),
+            "cliente": order_data.get("cliente"),
+            "endereco": order_data.get("endereco"),
+            "itens": order_data.get("itens"),
+            "pagamento": pagamento_out,
+            "status": order_data.get("status", "unknown")
         }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Erro ao obter o pedido: {str(e)}"
+        )
+
+@router.put("/orders/{order_id}", status_code=status.HTTP_200_OK)
+def update_order(order_id: str, order: OrderUpdate) -> Any:    
+    try:
+        order_dict: dict = order.model_dump(exclude_unset=True)
+        
+        if not order_dict:
+            permitted_fields = [field for field in OrderUpdate.model_fields if field != "order_id"]
+            raise HTTPException(status_code=400, detail="Nenhum campo válido para atualização foi fornecido. Campos permitidos para atualização: " + ", ".join(permitted_fields))
+        
+        updated_order = orders_store.update_order(order_id, order_dict)
+        return updated_order
     except Exception as e:
         raise HTTPException(
             status_code=400,

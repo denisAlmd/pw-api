@@ -81,3 +81,9 @@ class Order(BaseModel):
         if not v or len(v) == 0:
             raise ValueError("itens deve ser lista não vazia")
         return v
+    
+class OrderUpdate(BaseModel):
+    endereco: Optional[Endereco] = None
+    itens: Optional[List[Item]] = None
+    pagamento: Optional[Pagamento] = None
+    status: Optional[Literal["created", "updated", "cancelled"]] = None
