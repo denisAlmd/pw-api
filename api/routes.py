@@ -3,6 +3,9 @@ from typing import Any
 import uuid
 
 from models import Order
+from orders_store import OrdersStore
+
+orders_store = OrdersStore()
 
 router = APIRouter()
 
@@ -18,6 +21,8 @@ def create_order(order: Order) -> Any:
         if getattr(order.pagamento, "tipo", None) == "card":
             pagamento_out.pop("card_number", None)
 
+        orders_store.save_order(order_id, order.model_dump())
+
         return {
             "order_id": order_id,
             "total": total,
@@ -31,4 +36,24 @@ def create_order(order: Order) -> Any:
         raise HTTPException(
             status_code=400,
             detail=f"Erro ao processar o pedido: {str(e)}"
+        )
+
+@router.put("/orders/{order_id}", status_code=status.HTTP_200_OK)
+def update_order(order_id: str, order: Order) -> Any:
+    try:
+        # Atualiza o pedido no armazenamento
+        orders_store.update_order(order_id, order.model_dump())
+
+        return {
+            "order_id": order_id,
+            "status": "updated",
+            "cliente": order.cliente.model_dump(),
+            "endereco": order.endereco.model_dump(),
+            "itens": [item.model_dump() for item in order.itens],
+            "pagamento": order.pagamento.model_dump(),
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Erro ao atualizar o pedido: {str(e)}"
         )
