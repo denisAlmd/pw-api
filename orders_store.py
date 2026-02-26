@@ -46,7 +46,11 @@ class OrdersStore:
 
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(existing_data, f, indent=4, ensure_ascii=False)
-            existing_data['Campos atualizados'] = list(order_data.keys())
+
+            if len(order_data.keys()) > 1:
+                existing_data['Campos atualizados'] = list(order_data.keys())
+            else:
+                existing_data['Campo atualizado'] = list(order_data.keys())
             return existing_data
         except Exception as e:
             raise Exception(f"Erro ao atualizar o pedido: {str(e)}")
