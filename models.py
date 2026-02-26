@@ -30,7 +30,6 @@ class Item(BaseModel):
     produto_id: Optional[int] = None
     nome: Optional[str] = None
     quantidade: int = Field(..., gt=0)
-    preco_unitario: float = Field(..., ge=0)
 
     @field_validator("nome", mode="before")
     def produto_id_ou_nome(cls, v, info):

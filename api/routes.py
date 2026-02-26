@@ -12,7 +12,6 @@ router = APIRouter()
 def create_order(order: Order) -> Any:
     print(f"Recebido pedido: {order.model_dump()}")
     try:
-        total = sum(item.quantidade * item.preco_unitario for item in order.itens)
         order_id = str(uuid.uuid4())
 
         saved_order = orders_store.save_order(order_id, order.model_dump())
@@ -27,7 +26,6 @@ def create_order(order: Order) -> Any:
             "endereco": saved_order.get("endereco"),
             "itens": saved_order.get("itens"),
             "pagamento": pagamento_out,
-            "total": total
         }
     
     except Exception as e:

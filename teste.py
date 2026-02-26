@@ -25,14 +25,12 @@ def main():
             {
             "produto_id": 1,
             "nome": "Produto Exemplo",
-            "quantidade": 2,
-            "preco_unitario": 19.99
+            "quantidade": 2
             },
             {
             "produto_id": 2,
             "nome": "Outro Produto",
-            "quantidade": 1,
-            "preco_unitario": 29.99
+            "quantidade": 1
             }
         ],
         "pagamento": {
