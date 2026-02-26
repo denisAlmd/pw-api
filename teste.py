@@ -46,9 +46,9 @@ def main():
         }
     
     response = req.post(url, json=order_data)
-    # response_data = response.json()
-    # response_data["status_code"] = response.status_code
-    # print(json.dumps(response_data, indent=4))
+    response_data = response.json()
+    response_data["status_code"] = response.status_code
+    print(json.dumps(response_data, indent=4))
 
 if __name__ == "__main__":
     clear_console()

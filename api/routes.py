@@ -6,20 +6,18 @@ from models import Order
 from orders_store import OrdersStore
 
 orders_store = OrdersStore()
-
 router = APIRouter()
 
 @router.post("/orders", status_code=status.HTTP_201_CREATED)
 def create_order(order: Order) -> Any:
-    print(f"Recebido pedido: {order}")
+    print(f"Recebido pedido: {order.model_dump()}")
     try:
         total = sum(item.quantidade * item.preco_unitario for item in order.itens)
         order_id = str(uuid.uuid4())
 
         saved_order = orders_store.save_order(order_id, order.model_dump())
 
-        # Remove o número do cartão da resposta, se necessário
-        pagamento_out:dict = saved_order.get("pagamento", {})
+        pagamento_out: dict = saved_order.get("pagamento", {})
         if pagamento_out.get("tipo") == "card":
             pagamento_out.pop("card_number", None)
 

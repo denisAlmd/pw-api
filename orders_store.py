@@ -25,9 +25,11 @@ class OrdersStore:
         try:
             with open(self.filename, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError) as e:
-            raise Exception(f"Erro ao obter os pedidos: {str(e)}")
-        
+        except (json.JSONDecodeError, FileNotFoundError):
+            with open(self.filename, "w", encoding="utf-8") as f:
+                json.dump({}, f)
+            return {}
+
     def get_order(self, order_id: str) -> dict:
         try:
             orders = self._get_orders()
