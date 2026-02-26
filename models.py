@@ -27,21 +27,14 @@ class Endereco(BaseModel):
         return v
 
 class Item(BaseModel):
-    produto_id: Optional[int] = None
-    nome: Optional[str] = None
+    produto_id: int = Field(..., gt=0)
+    nome: str = Field(..., min_length=1)
     quantidade: int = Field(..., gt=0)
 
-    @field_validator("nome", mode="before")
-    def produto_id_ou_nome(cls, v, info):
-        values = info.data
-        if not v and not values.get("produto_id"):
-            raise ValueError("é necessário 'produto_id' ou 'nome'")
-        return v
-
-    @field_validator("nome")
-    def nome_not_empty(cls, v, info):
-        if v is not None and not v.strip():
-            raise ValueError("Nome do item não pode ser vazio")
+    @field_validator("produto_id", "nome", "quantidade")
+    def not_empty(cls, v):
+        if not v or (isinstance(v, str) and not v.strip()):
+            raise ValueError("Campo obrigatório não pode ser vazio")
         return v
 
 class PixPagamento(BaseModel):
