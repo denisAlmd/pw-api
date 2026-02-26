@@ -41,8 +41,7 @@ class OrdersStore:
             with open(file_path, "r", encoding="utf-8") as f:
                 existing_data: dict = json.load(f)
             
-            for key, value in order_data.items():
-                existing_data[key] = value
+            existing_data.update(order_data)
 
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(existing_data, f, indent=4, ensure_ascii=False)
