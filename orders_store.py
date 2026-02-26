@@ -38,11 +38,8 @@ class OrdersStore:
             if not os.path.exists(file_path):
                 raise Exception("Pedido não encontrado para atualização.")
             
-
             with open(file_path, "r", encoding="utf-8") as f:
                 existing_data: dict = json.load(f)
-
-            print(existing_data)
             
             for key, value in order_data.items():
                 existing_data[key] = value
